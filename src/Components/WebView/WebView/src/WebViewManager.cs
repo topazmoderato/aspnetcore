@@ -225,7 +225,7 @@ namespace Microsoft.AspNetCore.Components.WebView
         /// <inheritdoc/>
         public ValueTask DisposeAsync()
         {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            // Do not change this code. Put cleanup code in 'DisposeAsync(bool disposing)' method
             var task = DisposeAsync(disposing: true);
             GC.SuppressFinalize(this);
             return task;
