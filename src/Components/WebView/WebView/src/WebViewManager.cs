@@ -15,7 +15,7 @@ namespace Microsoft.AspNetCore.Components.WebView
     /// should subclass this to wire up the abstract and protected methods to the APIs of
     /// the platform's web view.
     /// </summary>
-    public abstract class WebViewManager : IDisposable
+    public abstract class WebViewManager : IAsyncDisposable
     {
         // These services are not DI services, because their lifetime isn't limited to a single
         // per-page-load scope. Instead, their lifetime matches the webview itself.
@@ -206,15 +206,16 @@ namespace Microsoft.AspNetCore.Components.WebView
         /// Disposes the current <see cref="WebViewManager"/> instance.
         /// </summary>
         /// <param name="disposing"><c>true</c> when dispose was called explicitly; <c>false</c> when it is called as part of the finalizer.</param>
-        protected virtual void Dispose(bool disposing)
+        protected virtual async ValueTask DisposeAsync(bool disposing)
         {
             if (!_disposed)
             {
                 if (disposing)
                 {
-                    // This is the same pattern that is used in Microsoft.Extensions.Hosting.Internal.Host.Dispose():
-                    //    https://github.com/dotnet/runtime/blob/645dfe69fb25407de7a5484d7a03d3342b4e0279/src/libraries/Microsoft.Extensions.Hosting/src/Internal/Host.cs#L146
-                    _currentPageContext?.DisposeAsync().AsTask().GetAwaiter().GetResult();
+                    if (_currentPageContext != null)
+                    {
+                        await _currentPageContext.DisposeAsync();
+                    }
                 }
 
                 _disposed = true;
@@ -222,11 +223,12 @@ namespace Microsoft.AspNetCore.Components.WebView
         }
 
         /// <inheritdoc/>
-        public void Dispose()
+        public ValueTask DisposeAsync()
         {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
+            var task = DisposeAsync(disposing: true);
             GC.SuppressFinalize(this);
+            return task;
         }
     }
 }

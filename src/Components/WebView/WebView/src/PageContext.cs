@@ -46,10 +46,10 @@ namespace Microsoft.AspNetCore.Components.WebView
             Renderer = new WebViewRenderer(services, dispatcher, ipcSender, loggerFactory, JSRuntime.ElementReferenceContext);
         }
 
-        public async ValueTask DisposeAsync()
+        public ValueTask DisposeAsync()
         {
             Renderer.Dispose();
-            await _serviceScope.DisposeAsync();
+            return _serviceScope.DisposeAsync();
         }
     }
 }

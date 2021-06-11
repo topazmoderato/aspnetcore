@@ -91,7 +91,7 @@ namespace Microsoft.AspNetCore.Components.WebView
             webViewManager.ReceiveAttachPageMessage();
 
             // Act
-            webViewManager.Dispose();
+            await webViewManager.DisposeAsync();
         }
 
         [Fact]
