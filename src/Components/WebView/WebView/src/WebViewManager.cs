@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
@@ -176,7 +175,10 @@ namespace Microsoft.AspNetCore.Components.WebView
             // If there was some previous attached page, dispose all its resources. We're not eagerly disposing
             // page contexts when the user navigates away, because we don't get notified about that. We could
             // change this if any important reason emerges.
-            _currentPageContext?.Dispose();
+            if (_currentPageContext != null)
+            {
+                await _currentPageContext.DisposeAsync();
+            }
 
             var serviceScope = _provider.CreateAsyncScope();
             _currentPageContext = new PageContext(_dispatcher, serviceScope, _ipcSender, baseUrl, startUrl);
@@ -210,7 +212,9 @@ namespace Microsoft.AspNetCore.Components.WebView
             {
                 if (disposing)
                 {
-                    _currentPageContext?.Dispose();
+                    // This is the same pattern that is used in Microsoft.Extensions.Hosting.Internal.Host.Dispose():
+                    //    https://github.com/dotnet/runtime/blob/645dfe69fb25407de7a5484d7a03d3342b4e0279/src/libraries/Microsoft.Extensions.Hosting/src/Internal/Host.cs#L146
+                    _currentPageContext?.DisposeAsync().AsTask().GetAwaiter().GetResult();
                 }
 
                 _disposed = true;
