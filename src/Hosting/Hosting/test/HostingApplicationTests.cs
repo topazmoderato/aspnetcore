@@ -194,6 +194,7 @@ namespace Microsoft.AspNetCore.Hosting.Tests
                 NullLogger.Instance,
                 new DiagnosticListener("Microsoft.AspNetCore"),
                 activitySource ?? new ActivitySource("Microsoft.AspNetCore"),
+                TextMapPropagator.Default,
                 httpContextFactory);
 
             return hostingApplication;
