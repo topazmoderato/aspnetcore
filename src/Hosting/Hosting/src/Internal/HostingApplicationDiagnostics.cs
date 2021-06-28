@@ -26,13 +26,19 @@ namespace Microsoft.AspNetCore.Hosting
 
         private readonly ActivitySource _activitySource;
         private readonly DiagnosticListener _diagnosticListener;
+        private readonly TextMapPropagator _propagator;
         private readonly ILogger _logger;
 
-        public HostingApplicationDiagnostics(ILogger logger, DiagnosticListener diagnosticListener, ActivitySource activitySource)
+        public HostingApplicationDiagnostics(
+            ILogger logger,
+            DiagnosticListener diagnosticListener,
+            ActivitySource activitySource,
+            TextMapPropagator propagator)
         {
             _logger = logger;
             _diagnosticListener = diagnosticListener;
             _activitySource = activitySource;
+            _propagator = propagator;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -263,7 +269,6 @@ namespace Microsoft.AspNetCore.Hosting
         [MethodImpl(MethodImplOptions.NoInlining)]
         private Activity? StartActivity(HttpContext httpContext, bool loggingEnabled, bool diagnosticListenerActivityCreationEnabled, out bool hasDiagnosticListener)
         {
-            var propagator = TextMapPropagator.Default;
             var activity = _activitySource.CreateActivity(ActivityName, ActivityKind.Server);
             if (activity is null && (loggingEnabled || diagnosticListenerActivityCreationEnabled))
             {
@@ -277,7 +282,7 @@ namespace Microsoft.AspNetCore.Hosting
             }
             var headers = httpContext.Request.Headers;
 
-            propagator.Extract(headers, static (object carrier, string fieldName, out string? value) =>
+            _propagator.Extract(headers, static (object carrier, string fieldName, out string? value) =>
             {
                 value = default;
                 var headers = ((IHeaderDictionary)carrier);
@@ -303,7 +308,7 @@ namespace Microsoft.AspNetCore.Hosting
             
             if (!string.IsNullOrEmpty(requestId))
             {
-                propagator.Extract(headers, static (object carrier, string fieldName, out string? value) =>
+                _propagator.Extract(headers, static (object carrier, string fieldName, out string? value) =>
                 {
                     var headers = ((IHeaderDictionary)carrier);
                     value = headers[fieldName];
