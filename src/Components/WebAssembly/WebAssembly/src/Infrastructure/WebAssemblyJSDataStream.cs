@@ -59,25 +59,26 @@ namespace Microsoft.AspNetCore.Components.WebAssembly.Infrastructure
         [JSInvokable("ReceiveJSDataChunk")]
         public async Task<bool> ReceiveJSDataChunk(long streamId, long chunkId, string error)
         {
-            // Ensure that the DotNetDataReference still points to an active stream
-            if (!_webAssemblyJSRuntime.JSDataStreamInstances.ContainsKey(streamId))
-            {
-                // There is no data stream with the given identifier. It may have already been disposed.
-                // We notify JS that the stream has been cancelled/disposed.
-                return false;
-            }
-
-            var data = Array.Empty<byte>();
-            if (string.IsNullOrEmpty(error))
-            {
-                // Ideally this byte array would be transferred directly as a parameter on this
-                // call, however that's not currently possible due to: https://github.com/dotnet/runtime/issues/53378
-                data = _webAssemblyJSRuntime.InvokeUnmarshalled<byte[]>("Blazor._internal.retrieveByteArray");
-            }
-
             try
             {
                 await receiveDataSemaphore.WaitAsync(_streamCancellationToken);
+
+                // Ensure that the DotNetDataReference still points to an active stream
+                if (!_webAssemblyJSRuntime.JSDataStreamInstances.ContainsKey(streamId))
+                {
+                    // There is no data stream with the given identifier. It may have already been disposed.
+                    // We notify JS that the stream has been cancelled/disposed.
+                    return false;
+                }
+
+                var data = Array.Empty<byte>();
+                if (string.IsNullOrEmpty(error))
+                {
+                    // Ideally this byte array would be transferred directly as a parameter on this
+                    // call, however that's not currently possible due to: https://github.com/dotnet/runtime/issues/53378
+                    data = _webAssemblyJSRuntime.InvokeUnmarshalled<byte[]>("Blazor._internal.retrieveByteArray");
+                }
+
                 return await ReceiveData(chunkId, data, error);
             }
             finally

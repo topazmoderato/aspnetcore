@@ -60,17 +60,18 @@ namespace Microsoft.AspNetCore.Components.WebView.Services
         [JSInvokable("ReceiveJSDataChunk")]
         public async Task<bool> ReceiveJSDataChunk(long streamId, long chunkId, byte[] chunk, string error)
         {
-            // Ensure that the DotNetDataReference still points to an active stream
-            if (!_webviewJSRuntime.JSDataStreamInstances.ContainsKey(streamId))
-            {
-                // There is no data stream with the given identifier. It may have already been disposed.
-                // We notify JS that the stream has been cancelled/disposed.
-                return false;
-            }
-
             try
             {
                 await receiveDataSemaphore.WaitAsync(_streamCancellationToken);
+
+                // Ensure that the DotNetDataReference still points to an active stream
+                if (!_webviewJSRuntime.JSDataStreamInstances.ContainsKey(streamId))
+                {
+                    // There is no data stream with the given identifier. It may have already been disposed.
+                    // We notify JS that the stream has been cancelled/disposed.
+                    return false;
+                }
+
                 return await ReceiveData(chunkId, chunk, error);
             }
             finally
