@@ -71,56 +71,75 @@ async function invokeDotNetInteropMethodsAsync(shouldSupportSyncInterop, dotNetO
   await DotNet.invokeMethodAsync(assemblyName, 'VoidWithSevenParametersAsync', ...createArgumentList(7, dotNetObjectByRef));
   await DotNet.invokeMethodAsync(assemblyName, 'VoidWithEightParametersAsync', ...createArgumentList(8, dotNetObjectByRef));
 
-  console.log('Invoking returning async methods.');
-  results['result1Async'] = await DotNet.invokeMethodAsync(assemblyName, 'ReturnArrayAsync');
-  results['result2Async'] = await DotNet.invokeMethodAsync(assemblyName, 'EchoOneParameterAsync', ...createArgumentList(1, dotNetObjectByRef));
-  results['result3Async'] = await DotNet.invokeMethodAsync(assemblyName, 'EchoTwoParametersAsync', ...createArgumentList(2, dotNetObjectByRef));
-  results['result4Async'] = await DotNet.invokeMethodAsync(assemblyName, 'EchoThreeParametersAsync', ...createArgumentList(3, dotNetObjectByRef));
-  results['result5Async'] = await DotNet.invokeMethodAsync(assemblyName, 'EchoFourParametersAsync', ...createArgumentList(4, dotNetObjectByRef));
-  results['result6Async'] = await DotNet.invokeMethodAsync(assemblyName, 'EchoFiveParametersAsync', ...createArgumentList(5, dotNetObjectByRef));
-  results['result7Async'] = await DotNet.invokeMethodAsync(assemblyName, 'EchoSixParametersAsync', ...createArgumentList(6, dotNetObjectByRef));
-  results['result8Async'] = await DotNet.invokeMethodAsync(assemblyName, 'EchoSevenParametersAsync', ...createArgumentList(7, dotNetObjectByRef));
-  results['result9Async'] = await DotNet.invokeMethodAsync(assemblyName, 'EchoEightParametersAsync', ...createArgumentList(8, dotNetObjectByRef));
+    console.log('Invoking returning async methods.');
 
-  const returnDotNetObjectByRefAsync = await DotNet.invokeMethodAsync(assemblyName, 'ReturnDotNetObjectByRefAsync');
-  results['resultReturnDotNetObjectByRefAsync'] = await DotNet.invokeMethodAsync(assemblyName, 'ExtractNonSerializedValue', returnDotNetObjectByRefAsync['Some async instance']);
+    try {
+        results['result1Async'] = await DotNet.invokeMethodAsync(assemblyName, 'ReturnArrayAsync');
+        results['result2Async'] = await DotNet.invokeMethodAsync(assemblyName, 'EchoOneParameterAsync', ...createArgumentList(1, dotNetObjectByRef));
+        results['result3Async'] = await DotNet.invokeMethodAsync(assemblyName, 'EchoTwoParametersAsync', ...createArgumentList(2, dotNetObjectByRef));
+        results['result4Async'] = await DotNet.invokeMethodAsync(assemblyName, 'EchoThreeParametersAsync', ...createArgumentList(3, dotNetObjectByRef));
+        results['result5Async'] = await DotNet.invokeMethodAsync(assemblyName, 'EchoFourParametersAsync', ...createArgumentList(4, dotNetObjectByRef));
+        results['result6Async'] = await DotNet.invokeMethodAsync(assemblyName, 'EchoFiveParametersAsync', ...createArgumentList(5, dotNetObjectByRef));
+        results['result7Async'] = await DotNet.invokeMethodAsync(assemblyName, 'EchoSixParametersAsync', ...createArgumentList(6, dotNetObjectByRef));
+        results['result8Async'] = await DotNet.invokeMethodAsync(assemblyName, 'EchoSevenParametersAsync', ...createArgumentList(7, dotNetObjectByRef));
+        results['result9Async'] = await DotNet.invokeMethodAsync(assemblyName, 'EchoEightParametersAsync', ...createArgumentList(8, dotNetObjectByRef));
 
-  var jsObjectReference = DotNet.createJSObjectReference({
-    prop: 'successful',
-    noop: function () { }
-  });
+        console.log('a.');
+        const returnDotNetObjectByRefAsync = await DotNet.invokeMethodAsync(assemblyName, 'ReturnDotNetObjectByRefAsync');
+        results['resultReturnDotNetObjectByRefAsync'] = await DotNet.invokeMethodAsync(assemblyName, 'ExtractNonSerializedValue', returnDotNetObjectByRefAsync['Some async instance']);
 
-  var returnedObject = await DotNet.invokeMethodAsync(assemblyName, 'RoundTripJSObjectReferenceAsync', jsObjectReference);
-  results['roundTripJSObjectReferenceAsync'] = returnedObject && returnedObject.prop;
+        console.log('b.');
+        var jsObjectReference = DotNet.createJSObjectReference({
+            prop: 'successful',
+            noop: function () { }
+        });
 
-  DotNet.disposeJSObjectReference(jsObjectReference);
-  results['invokeDisposedJSObjectReferenceExceptionAsync'] = await DotNet.invokeMethodAsync(assemblyName, 'InvokeDisposedJSObjectReferenceExceptionAsync', jsObjectReference);
+        console.log('c.');
+        var returnedObject = await DotNet.invokeMethodAsync(assemblyName, 'RoundTripJSObjectReferenceAsync', jsObjectReference);
+        results['roundTripJSObjectReferenceAsync'] = returnedObject && returnedObject.prop;
 
-  var byteArray = new Uint8Array([ 1, 5, 7, 17, 200, 138 ]);
-  var returnedByteArray = await DotNet.invokeMethodAsync(assemblyName, 'RoundTripByteArrayAsync', byteArray);
-  results['roundTripByteArrayAsyncFromJS'] = returnedByteArray;
+        console.log('d.');
+        DotNet.disposeJSObjectReference(jsObjectReference);
+        results['invokeDisposedJSObjectReferenceExceptionAsync'] = await DotNet.invokeMethodAsync(assemblyName, 'InvokeDisposedJSObjectReferenceExceptionAsync', jsObjectReference);
 
-  var byteArrayWrapper = { 'strVal': "Some string", 'byteArrayVal': byteArray, 'intVal': 42 };
-  var returnedByteArrayWrapper = await DotNet.invokeMethodAsync(assemblyName, 'RoundTripByteArrayWrapperObjectAsync', byteArrayWrapper);
-  results['roundTripByteArrayWrapperObjectAsyncFromJS'] = returnedByteArrayWrapper;
+        console.log('e.');
+        var byteArray = new Uint8Array([1, 5, 7, 17, 200, 138]);
+        var returnedByteArray = await DotNet.invokeMethodAsync(assemblyName, 'RoundTripByteArrayAsync', byteArray);
+        results['roundTripByteArrayAsyncFromJS'] = returnedByteArray;
 
-  const largeArray = Array.from({ length: 100000 }).map((_, index) => index % 256);
-  const largeByteArray = new Uint8Array(largeArray);
-  const jsStreamReference = DotNet.createJSStreamReference(largeByteArray);
-  results['jsToDotNetStreamParameterAsync'] = await DotNet.invokeMethodAsync(assemblyName, 'JSToDotNetStreamParameterAsync', jsStreamReference);
+        console.log('f.');
+        var byteArrayWrapper = { 'strVal': "Some string", 'byteArrayVal': byteArray, 'intVal': 42 };
+        var returnedByteArrayWrapper = await DotNet.invokeMethodAsync(assemblyName, 'RoundTripByteArrayWrapperObjectAsync', byteArrayWrapper);
+        results['roundTripByteArrayWrapperObjectAsyncFromJS'] = returnedByteArrayWrapper;
 
-  var streamWrapper = { 'strVal': "SomeStr", 'jsStreamReferenceVal': jsStreamReference, 'intVal': 5 };
-  results['jsToDotNetStreamWrapperObjectParameterAsync'] = await DotNet.invokeMethodAsync(assemblyName, 'JSToDotNetStreamWrapperObjectParameterAsync', streamWrapper);
+        console.log('g.');
+        const largeArray = Array.from({ length: 100000 }).map((_, index) => index % 256);
+        const largeByteArray = new Uint8Array(largeArray);
+        console.log('g1.');
+        const jsStreamReference = DotNet.createJSStreamReference(largeByteArray);
+        console.log('g2.');
+        results['jsToDotNetStreamParameterAsync'] = await DotNet.invokeMethodAsync(assemblyName, 'JSToDotNetStreamParameterAsync', jsStreamReference);
 
-  const instanceMethodAsync = await instanceMethodsTarget.invokeMethodAsync('InstanceMethodAsync', {
-    stringValue: 'My string',
-    dtoByRef: dotNetObjectByRef
-  });
+        console.log('h.');
+        var streamWrapper = { 'strVal': "SomeStr", 'jsStreamReferenceVal': jsStreamReference, 'intVal': 5 };
+        console.log('h1.');
+        results['jsToDotNetStreamWrapperObjectParameterAsync'] = await DotNet.invokeMethodAsync(assemblyName, 'JSToDotNetStreamWrapperObjectParameterAsync', streamWrapper);
 
-  results['instanceMethodThisTypeNameAsync'] = instanceMethodAsync.thisTypeName;
-  results['instanceMethodStringValueUpperAsync'] = instanceMethodAsync.stringValueUpper;
-  results['instanceMethodIncomingByRefAsync'] = instanceMethodAsync.incomingByRef;
-  results['instanceMethodOutgoingByRefAsync'] = await DotNet.invokeMethodAsync(assemblyName, 'ExtractNonSerializedValue', instanceMethodAsync.outgoingByRef);
+        console.log('i.');
+        const instanceMethodAsync = await instanceMethodsTarget.invokeMethodAsync('InstanceMethodAsync', {
+            stringValue: 'My string',
+            dtoByRef: dotNetObjectByRef
+        });
+
+        console.log('j.');
+        results['instanceMethodThisTypeNameAsync'] = instanceMethodAsync.thisTypeName;
+        results['instanceMethodStringValueUpperAsync'] = instanceMethodAsync.stringValueUpper;
+        results['instanceMethodIncomingByRefAsync'] = instanceMethodAsync.incomingByRef;
+        results['instanceMethodOutgoingByRefAsync'] = await DotNet.invokeMethodAsync(assemblyName, 'ExtractNonSerializedValue', instanceMethodAsync.outgoingByRef);
+        console.log('k.');
+    } catch (e) {
+        console.log(`Ran into ${e}`);
+    }
 
   console.log('Invoking generic type instance methods.');
 
