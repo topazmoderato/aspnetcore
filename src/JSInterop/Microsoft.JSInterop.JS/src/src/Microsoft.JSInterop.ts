@@ -393,6 +393,9 @@ export module DotNet {
      * @param resultJsonOrExceptionMessage Either the operation result as JSON, or an error message.
      */
     endInvokeDotNetFromJS: (asyncCallId: string, success: boolean, resultJsonOrExceptionMessage: string): void => {
+      if (!success) {
+        console.log(resultJsonOrExceptionMessage);
+      }
       const resultOrError = success
         ? parseJsonWithRevivers(resultJsonOrExceptionMessage)
         : new Error(resultJsonOrExceptionMessage);
